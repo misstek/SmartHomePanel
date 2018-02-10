@@ -6,5 +6,7 @@ IDE开发工具:TouchGFX 4.9.2版本以及Keil 5.22版本
 ## 项目内容
 主要采用TouchGFX设计GUI界面，界面简洁美观，结合LPC54608开发板4.3寸触摸屏，从而达到GUI界面显示效果
 ## 项目展示
+生成的hex文件在\target\Keil\Objects  
+LPC54608开发板可以直接烧写  
 视频演示地址:
 http://v.youku.com/v_show/id_XMzM5MzQwMjA4MA==.html
