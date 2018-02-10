@@ -1,0 +1,18 @@
+Converting images
+ERROR: assets/images/Thumbs.db not supported by image converter
+Compiling generated/gui_generated/src/main_screen/MainViewBase.cpp
+Compiling generated/gui_generated/src/down_screen/DownViewBase.cpp
+Compiling generated/gui_generated/src/common/FrontendApplicationBase.cpp
+Compiling generated/fonts/src/Kerning_verdana_10_4bpp.cpp
+Compiling generated/fonts/src/FontGetters.cpp
+Compiling generated/fonts/src/Table_verdana_15_4bpp.cpp
+Compiling generated/fonts/src/Table_verdana_10_4bpp.cpp
+Compiling generated/fonts/src/Font_verdana_15_4bpp.cpp
+Compiling generated/fonts/src/Font_verdana_10_4bpp.cpp
+Compiling generated/fonts/src/Kerning_verdana_15_4bpp.cpp
+Compiling generated/fonts/src/ApplicationFontProvider.cpp
+Compiling generated/texts/src/LanguageGb.cpp
+Compiling generated/texts/src/TypedTextDatabase.cpp
+Compiling generated/texts/src/Texts.cpp
+Compiling simulator/main.cpp
+Linking build/bin/simulator.exe

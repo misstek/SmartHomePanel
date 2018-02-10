@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<iarUserArgVars>
+  <group active="true" name="NXP_SDK">
+    <variable>
+      <name>NXP_SDK_PATH</name>
+      <value>$PROJ_DIR$\..\bsp\SDK\IAR</value>
+    </variable>
+  </group>
+</iarUserArgVars>
+
+

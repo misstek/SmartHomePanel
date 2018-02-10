@@ -1,0 +1,213 @@
+
+__param spifi_mode = 1;
+__Setup()
+{
+   __var tempReg;
+   // MAP flash at 0
+  __writeMemory32(0x2, 0x40000000, "Memory");
+  
+  //Enable clocks to SRAM1 and SRAM2 and SRAM3 via AHBCLOCKCTRLSET0
+  __writeMemory32(0x38, 0x40000220, "Memory");
+   
+  /* 
+    fro_hf = 96Mhz by default
+    MAINCLKSELA[1:0] = 0b11 == fro_hf
+    MAINCLKSELB[1:0] = 0    == MAINCLKSELA (default)
+    AHBCLKDIV[7:0]   = 0    == /1 (default)
+    AHBCLKCTRL[10]   = 1    == Enable
+    SPIFICLKSEL[2:0] = 0    == main_clk
+    SPIFICLKDIV[7:0] = 0h3  == /4
+  */
+  
+  /*MAINCLKSELA[1:0] = 0b11 == fro_hf*/
+  __writeMemory32(0x00000003, 0x40000280, "Memory");
+  
+  /*SPIFICLKSEL[2:0] = 0    == main_clk*/
+  __writeMemory32(0x00000000, 0x400002A0, "Memory");
+  
+  /*AHBCLKCTRLSET0[10] = 1    == SPIFI Enable*/
+  __writeMemory32(  (1<<10) , 0x40000220, "Memory");
+  
+  /*SPIFICLKDIV[7:0] = 0h7  == /8*/
+  __writeMemory32(0x00000003, 0x40000390, "Memory");
+  
+  /*AHBCLKCTRLSET0[10] = 1    == SPIFI Enable*/
+  __writeMemory32(  (1<<10) , 0x40000220, "Memory");
+  
+  /*AHBCLKCTRLSET0[13] = 1    == IOCON Enable*/
+  __writeMemory32(  (1<<13) , 0x40000220, "Memory");
+
+  /*Config IO pins */
+  tempReg = __readMemory32(0x40001060, "Memory");
+  tempReg &= ~(0xFF); 
+  tempReg |=  (0x26);
+  /*PIO0_24 -> SPIFI_IO0*/
+  __writeMemory32(tempReg, 0x40001060, "Memory");  /*SPIFI_IO[0]*/
+  /*PIO0_25 -> SPIFI_IO1*/
+  __writeMemory32(tempReg, 0x40001064, "Memory");  /*SPIFI_IO[1]*/
+    /*PIO0_28 -> SPIFI_IO2*/
+  __writeMemory32(tempReg, 0x40001070, "Memory");  /*SPIFI_IO[2]*/
+  /*PIO0_27 -> SPIFI_IO3*/
+  __writeMemory32(tempReg, 0x4000106C, "Memory");  /*SPIFI_IO[3]*/
+  /*PIO0_26 -> SPIFI_CLK*/
+  __writeMemory32(tempReg, 0x40001068, "Memory");  /*SPIFI_CLK*/
+  /*PIO0_23 -> SPIFI_CSN*/
+  __writeMemory32(tempReg, 0x4000105C, "Memory");  /*SPIFI_CS*/
+}
+
+execUserReset()
+{
+  __message "------ execUserReset\n";
+  __Setup();
+}
+
+prepareSPIFIMCMDQuad(numbOfAddressBytes)
+{
+	__var MCMD;
+	if(numbOfAddressBytes==3)
+	{
+		/*Prepare memory command register MCMD value 
+		  SPIFI_CMD_OPCODE(CMD_EB_QIOR)                      =   0xEB << 24
+		  SPIFI_CMD_DOUT(0)                                  =   0x0  << 15
+		  SPIFI_CMD_INTER(5)                                 =   0x5  << 16
+		  SPIFI_CMD_FIELDFORM(SPIFI_FIELDFORM_SERIAL_OPCODE) =   0x2  << 19
+		  SPIFI_CMD_FRAMEFORM(SPIFI_FRAMEFORM_OP_3ADDRESS)   =   0x4  << 21
+		*/
+		MCMD = (0xEB<<24)|(0x0<<15)|(0x5<<16)|(0x2<<19)|(0x4<<21);
+	}else if(numbOfAddressBytes==4)
+	{
+		/*Prepare memory command register MCMD value 
+		  SPIFI_CMD_OPCODE(CMD_EB_QIOR)                      =   0xEB << 24
+		  SPIFI_CMD_DOUT(0)                                  =   0x0  << 15
+		  SPIFI_CMD_INTER(5)                                 =   0x5  << 16
+		  SPIFI_CMD_FIELDFORM(SPIFI_FIELDFORM_SERIAL_OPCODE) =   0x2  << 19
+		  SPIFI_CMD_FRAMEFORM(SPIFI_FRAMEFORM_OP_4ADDRESS)   =   0x5  << 21
+		*/
+		MCMD = (0xEB<<24)|(0x0<<15)|(0x5<<16)|(0x2<<19)|(0x5<<21);
+	}else
+	{
+		/*Error. Not supported number of address bytes option*/
+		return 0;
+	}
+	return MCMD;
+}
+
+prepareSPIFIMCMDDual(numbOfAddressBytes)
+{
+	__var MCMD;
+	if(numbOfAddressBytes==3)
+	{
+		/*Prepare memory command register MCMD value 
+		  SPIFI_CMD_OPCODE(CMD_BB_DIOR)                     	=   0xBB << 24
+		  SPIFI_CMD_DOUT(0)                                	    =   0x0  << 15
+		  SPIFI_CMD_INTER(2)                               	    =   0x2  << 16
+		  SPIFI_CMD_FIELDFORM(SPIFI_FIELDFORM_SERIAL_OPCODE)	=   0x2  << 19
+		  SPIFI_CMD_FRAMEFORM(SPIFI_FRAMEFORM_OP_3ADDRESS)  	=   0x4  << 21
+		*/
+		MCMD = (0xBB<<24)|(0x0<<15)|(0x2<<16)|(0x2<<19)|(0x4<<21);
+	}else if(numbOfAddressBytes==4)
+	{
+		/* Prepare memory command register MCMD value 
+		SPIFI_CMD_OPCODE(CMD_BB_DIOR)                     	=   0xBB << 24
+		SPIFI_CMD_DOUT(0)                                	=   0x0  << 15
+		SPIFI_CMD_INTER(2)                               	=   0x2  << 16
+		SPIFI_CMD_FIELDFORM(SPIFI_FIELDFORM_SERIAL_OPCODE)	=   0x2  << 19
+		SPIFI_CMD_FRAMEFORM(SPIFI_FRAMEFORM_OP_4ADDRESS)  	=   0x5  << 21
+		*/
+		MCMD = (0xBB<<24)|(0x0<<15)|(0x2<<16)|(0x2<<19)|(0x5<<21);
+	}else{
+		/*Error. Not supported number of address bytes option*/
+		return 0;
+	}
+	return MCMD;
+}
+
+prepareSPIFIMCMDSerial(numbOfAddressBytes)
+{
+	__var MCMD;
+	if(numbOfAddressBytes==3){
+		/* Prepare memory command register MCMD value 
+		   SPIFI_CMD_OPCODE(CMD_0B_FAST_READ) 					=   0x0B << 24
+		   SPIFI_CMD_DOUT(0)                                    =   0x0  << 15
+		   SPIFI_CMD_INTER(1)                                   =   0x1  << 16
+		   SPIFI_CMD_FIELDFORM(SPIFI_FIELDFORM_ALL_SERIAL)      =   0x0  << 19
+		   SPIFI_CMD_FRAMEFORM(SPIFI_FRAMEFORM_OP_3ADDRESS)     =   0x4  << 21
+		*/
+		MCMD = (0x0B<<24)|(0x0<<15)|(0x1<<16)|(0x0<<19)|(0x4<<21);
+	}else if(numbOfAddressBytes==4)
+	{
+		/* Prepare memory command register MCMD value 
+		   SPIFI_CMD_OPCODE(CMD_0B_FAST_READ) 					=   0x0B << 24
+		   SPIFI_CMD_DOUT(0)                                    =   0x0  << 15
+		   SPIFI_CMD_INTER(1)                                   =   0x1  << 16
+		   SPIFI_CMD_FIELDFORM(SPIFI_FIELDFORM_ALL_SERIAL)      =   0x0  << 19
+		   SPIFI_CMD_FRAMEFORM(SPIFI_FRAMEFORM_OP_4ADDRESS)     =   0x5  << 21
+		*/
+		MCMD = (0x0B<<24)|(0x0<<15)|(0x1<<16)|(0x0<<19)|(0x5<<21);
+	}else{
+		/*Error. Not supported number of address bytes option*/
+		return 0;
+	}
+	return MCMD;
+}
+
+execUserPreload() {
+	__message "----- execUserPreload -----\n";
+	/*
+		spifi_mode = 1 -> serial mode
+		spifi_mode = 2 -> dual   mode
+		spifi_mode = 4 -> quad   mode
+	*/
+
+	/*
+		numbOfAddressBytes = 3 -> SPI Flash needs 3 address bytes
+		numbOfAddressBytes = 4 -> SPI Flash needs 4 address bytes
+	*/
+	__var numbOfAddressBytes;
+        numbOfAddressBytes = 3;
+
+	
+	__Setup();
+	
+	__var MCMD;
+	
+	if(spifi_mode==4)
+	{
+		MCMD=prepareSPIFIMCMDQuad(numbOfAddressBytes);
+		__message "Preparing to memory map SPIFI memory in 1-4-4 Quad"; 
+	}else if(spifi_mode==2)
+	{
+		/*Puts SPIFI controller in dual mode*/
+		__writeMemory32( (1<<28), 0x40080000, "Memory");
+		MCMD = prepareSPIFIMCMDDual(numbOfAddressBytes);
+		__message "Preparing to memory map SPIFI memory in 1-2-2 Dual";
+    }else if(spifi_mode==1)
+	{	
+		/*Puts SPIFI controller in serial mode*/
+		MCMD = prepareSPIFIMCMDSerial(numbOfAddressBytes);
+		__message "Preparing to memory map SPIFI memory in 1-1-1 Serial";
+	}else
+	{
+		__message "Unsupported SPI IO mode!\n";
+		return;
+	}
+	if(MCMD==0)
+	{
+		__message "Unsupported number of address bytes!\n";
+		return;
+	}
+	
+	/* Write 1 to SPIFI RESET bit in STAT register, address 0x4000301C */
+	__writeMemory32( (1<<4), 0x4008001C, "Memory");
+	
+	
+	/* Wait until RESET bit goes to 0 */
+	while(__readMemory32(0x4008001C,"Memory") & (1<<4));
+	
+	
+	/* Write Intermediar data register IDATA*/
+	__writeMemory32(0xFF, 0x4008000C, "Memory");
+	
+	/* Write memory command register MCMD 0x40003018 */
+	__writeMemory32(MCMD, 0x40080018, "Memory");
+}

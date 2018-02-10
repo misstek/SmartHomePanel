@@ -1,0 +1,11 @@
+Converting images
+ERROR: assets/images/Thumbs.db not supported by image converter
+Generating generated/fonts/UnicodeListverdana_10_4.txt
+Generating generated/fonts/UnicodeListverdana_15_4.txt
+Generating generated/fonts/src/ApplicationFontProvider.cpp
+Generating generated/fonts/include/fonts/ApplicationFontProvider.hpp
+Generating generated/texts/include/texts/TextKeysAndLanguages.hpp
+Generating generated/texts/src/Texts.cpp
+Generating generated/texts/src/LanguageGb.cpp
+Generating generated/texts/include/texts/TypedTextDatabase.hpp
+Generating generated/texts/src/TypedTextDatabase.cpp

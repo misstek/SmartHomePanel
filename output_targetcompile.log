@@ -1,0 +1,5 @@
+
+F:\1touchgfx\TransitionExa>cd F:\1touchgfx\TransitionExa\target\IAR\ 
+
+F:\1touchgfx\TransitionExa\target\IAR>"c:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\common\bin\IarBuild.exe" application.ewp -make Debug -varfile application.custom_argvars 
+系统找不到指定的路径。
